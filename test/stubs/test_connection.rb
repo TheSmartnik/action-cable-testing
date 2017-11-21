@@ -7,7 +7,7 @@ class TestConnection
 
   delegate :pubsub, to: :server
 
-  def initialize(user = User.new("lifo"), coder: ActiveSupport::JSON, subscription_adapter: SuccessAdapter)
+  def initialize(user = User.new(42), coder: ActiveSupport::JSON, subscription_adapter: SuccessAdapter)
     @coder = coder
     @identifiers = [ :current_user ]
 

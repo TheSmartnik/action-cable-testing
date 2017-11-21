@@ -9,7 +9,7 @@ module RSpec
       module ActionCable
         # rubocop: disable Style/ClassLength
         # @private
-        class HaveBroadcastedTo < RSpec::Matchers::BuiltIn::BaseMatcher
+        class HaveBroadcasted < RSpec::Matchers::BuiltIn::BaseMatcher
           def initialize(stream)
             @stream = stream
             @block = Proc.new {}
@@ -154,35 +154,70 @@ module RSpec
       # @example
       #     expect {
       #       ActionCable.server.broadcast "messages", text: 'Hi!'
-      #     }.to have_broadcasted_to("messages")
+      #     }.to have_broadcasted("messages")
       #
       #     # Using alias
       #     expect {
       #       ActionCable.server.broadcast "messages", text: 'Hi!'
-      #     }.to broadcast_to("messages")
+      #     }.to broadcast("messages")
       #
       #     expect {
       #       ActionCable.server.broadcast "messages", text: 'Hi!'
       #       ActionCable.server.broadcast "all", text: 'Hi!'
-      #     }.to have_broadcasted_to("messages").exactly(:once)
+      #     }.to have_broadcasted("messages").exactly(:once)
       #
       #     expect {
       #       3.times { ActionCable.server.broadcast "messages", text: 'Hi!' }
-      #     }.to have_broadcasted_to("messages").at_least(2).times
+      #     }.to have_broadcasted("messages").at_least(2).times
       #
       #     expect {
       #       ActionCable.server.broadcast "messages", text: 'Hi!'
-      #     }.to have_broadcasted_to("messages").at_most(:twice)
+      #     }.to have_broadcasted("messages").at_most(:twice)
       #
       #     expect {
       #       ActionCable.server.broadcast "messages", text: 'Hi!'
-      #     }.to have_broadcasted_to("messages").with(text: 'Hi!')
-      def have_broadcasted_to(stream = nil)
+      #     }.to have_broadcasted("messages").with(text: 'Hi!')
+      def have_broadcasted(stream = nil)
         check_action_cable_adapter
-        ActionCable::HaveBroadcastedTo.new(stream)
+
+        ActionCable::HaveBroadcasted.new(stream)
+      end
+      alias_method :broadcast, :have_broadcasted
+
+
+      # @api public
+      # Works same as {#have_broadcasted}, but as accepts record as first argument.
+      #
+      # @example
+      #     expect {
+      #       ActionCable.server.broadcast_to current_user, text: 'Hi!'
+      #     }.to have_broadcasted_to(current_user)
+      #
+      #     # Using alias
+      #     expect {
+      #       ActionCable.server.broadcast_to current_user, text: 'Hi!'
+      #     }.to broadcast_to(current_user)
+      #
+      #     expect {
+      #       ActionCable.server.broadcast "messages", text: 'Hi!'
+      #     }.to have_broadcasted_to(current_user).exactly(:once)
+      #
+      #     expect {
+      #       3.times { ActionCable.server.broadcast "messages", text: 'Hi!' }
+      #     }.to have_broadcasted_to(current_user).at_least(2).times
+      #
+      #     expect {
+      #       ActionCable.server.broadcast current_user, text: 'Hi!'
+      #     }.to have_broadcasted_to(current_user).at_most(:twice)
+      #
+      #     expect {
+      #       ActionCable.server.broadcast current_user, text: 'Hi!'
+      #     }.to have_broadcasted_to(current_user).with(text: 'Hi!')
+      def have_broadcasted_to(record = nil)
+        stream = described_class.broadcasting_for([described_class.channel_name, record])
+        have_broadcasted(stream)
       end
       alias_method :broadcast_to, :have_broadcasted_to
-
     private
 
       # @private

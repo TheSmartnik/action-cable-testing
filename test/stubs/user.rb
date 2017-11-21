@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 class User
-  attr_reader :name
+  attr_reader :id
 
-  def initialize(name)
-    @name = name
+  def initialize(id)
+    @id = id
   end
 
   def to_global_id
-    GlobalID.new("User##{name}")
+    GlobalID.new("gid://dummy/User/#{id}")
   end
 
   def to_gid_param

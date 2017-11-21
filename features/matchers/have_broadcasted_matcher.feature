@@ -1,6 +1,6 @@
 Feature: have_broadcasted matcher
 
-  The `have_broadcasted_to` (also aliased as `broadcast_to`) matcher is used to check if a message has been broadcasted to a given stream.
+  The `have_broadcasted` (also aliased as `broadcast`) matcher is used to check if a message has been broadcasted to a given stream.
 
   Background:
     Given action cable is available
@@ -16,7 +16,7 @@ Feature: have_broadcasted matcher
             ActionCable.server.broadcast(
               "notifications", text: 'Hello!'
             )
-          }.to have_broadcasted_to("notifications")
+          }.to have_broadcasted("notifications")
         end
       end
       """
@@ -34,7 +34,7 @@ Feature: have_broadcasted matcher
             ActionCable.server.broadcast(
               "notifications", text: 'Hello!'
             )
-          }.to have_broadcasted_to("notifications").with(text: 'Hello!')
+          }.to have_broadcasted("notifications").with(text: 'Hello!')
         end
       end
       """
@@ -53,7 +53,7 @@ Feature: have_broadcasted matcher
             ActionCable.server.broadcast(
               "notifications", text: 'Hello!', user_id: 12
             )
-          }.to have_broadcasted_to("notifications").with(a_hash_including(text: 'Hello!'))
+          }.to have_broadcasted("notifications").with(a_hash_including(text: 'Hello!'))
         end
       end
       """
@@ -71,7 +71,7 @@ Feature: have_broadcasted matcher
             ActionCable.server.broadcast(
               "notifications", text: 'Hello!', user_id: 12
             )
-          }.to have_broadcasted_to("notifications").with { |data|
+          }.to have_broadcasted("notifications").with { |data|
             expect(data['user_id']).to eq 12
           }
         end
@@ -91,7 +91,7 @@ Feature: have_broadcasted matcher
             ActionCable.server.broadcast(
               "notifications", text: 'Hello!'
             )
-          }.to broadcast_to("notifications")
+          }.to broadcast("notifications")
         end
       end
       """

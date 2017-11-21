@@ -6,7 +6,7 @@ if RSpec::Rails::FeatureCheck.has_action_cable?
 end
 
 RSpec.describe "ActionCable matchers", :skip => !RSpec::Rails::FeatureCheck.has_action_cable? do
-  def broadcast(stream, msg)
+  def make_broadcast(stream, msg)
     ActionCable.server.broadcast stream, msg
   end
 
@@ -16,138 +16,147 @@ RSpec.describe "ActionCable matchers", :skip => !RSpec::Rails::FeatureCheck.has_
     server.instance_variable_set(:@pubsub, test_adapter)
   end
 
-  describe "have_broadcasted_to" do
+  describe 'have_broadcasted_to' do
+    it 'broadcasts to object' do
+      binding.pry
+      expect {
+        make_broadcast('stream', 'hello')
+      }.to have_broadcasted('stream')
+    end
+  end
+
+  describe "have_broadcasted" do
     it "raises ArgumentError when no Proc passed to expect" do
       expect {
-        expect(true).to have_broadcasted_to('stream')
+        expect(true).to have_broadcasted('stream')
       }.to raise_error(ArgumentError)
     end
 
     it "passes with default messages count (exactly one)" do
       expect {
-        broadcast('stream', 'hello')
-      }.to have_broadcasted_to('stream')
+        make_broadcast('stream', 'hello')
+      }.to have_broadcasted('stream')
     end
 
     it "passes when using alias" do
       expect {
-        broadcast('stream', 'hello')
-      }.to broadcast_to('stream')
+        make_broadcast('stream', 'hello')
+      }.to broadcast('stream')
     end
 
     it "counts only messages sent in block" do
-      broadcast('stream', 'one')
+      make_broadcast('stream', 'one')
       expect {
-        broadcast('stream', 'two')
-      }.to have_broadcasted_to('stream').exactly(1)
+        make_broadcast('stream', 'two')
+      }.to have_broadcasted('stream').exactly(1)
     end
 
     it "passes when negated" do
-      expect { }.not_to have_broadcasted_to('stream')
+      expect { }.not_to have_broadcasted('stream')
     end
 
     it "fails when message is not sent" do
       expect {
-        expect { }.to have_broadcasted_to('stream')
+        expect { }.to have_broadcasted('stream')
       }.to raise_error(/expected to broadcast exactly 1 messages to stream, but broadcast 0/)
     end
 
-    it "fails when too many messages broadcast" do
+    it "fails when too many messages make_broadcast" do
       expect {
         expect {
-          broadcast('stream', 'one')
-          broadcast('stream', 'two')
-        }.to have_broadcasted_to('stream').exactly(1)
+          make_broadcast('stream', 'one')
+          make_broadcast('stream', 'two')
+        }.to have_broadcasted('stream').exactly(1)
       }.to raise_error(/expected to broadcast exactly 1 messages to stream, but broadcast 2/)
     end
 
     it "reports correct number in fail error message" do
-      broadcast('stream', 'one')
+      make_broadcast('stream', 'one')
       expect {
-        expect { }.to have_broadcasted_to('stream').exactly(1)
+        expect { }.to have_broadcasted('stream').exactly(1)
       }.to raise_error(/expected to broadcast exactly 1 messages to stream, but broadcast 0/)
     end
 
     it "fails when negated and message is sent" do
       expect {
-        expect { broadcast('stream', 'one') }.not_to have_broadcasted_to('stream')
+        expect { make_broadcast('stream', 'one') }.not_to have_broadcasted('stream')
       }.to raise_error(/expected not to broadcast exactly 1 messages to stream, but broadcast 1/)
     end
 
     it "passes with multiple streams" do
       expect {
-        broadcast('stream_a', 'A')
-        broadcast('stream_b', 'B')
-        broadcast('stream_c', 'C')
-      }.to have_broadcasted_to('stream_a').and have_broadcasted_to('stream_b')
+        make_broadcast('stream_a', 'A')
+        make_broadcast('stream_b', 'B')
+        make_broadcast('stream_c', 'C')
+      }.to have_broadcasted('stream_a').and have_broadcasted('stream_b')
     end
 
     it "passes with :once count" do
       expect {
-        broadcast('stream', 'one')
-      }.to have_broadcasted_to('stream').exactly(:once)
+        make_broadcast('stream', 'one')
+      }.to have_broadcasted('stream').exactly(:once)
     end
 
     it "passes with :twice count" do
       expect {
-        broadcast('stream', 'one')
-        broadcast('stream', 'two')
-      }.to have_broadcasted_to('stream').exactly(:twice)
+        make_broadcast('stream', 'one')
+        make_broadcast('stream', 'two')
+      }.to have_broadcasted('stream').exactly(:twice)
     end
 
     it "passes with :thrice count" do
       expect {
-        broadcast('stream', 'one')
-        broadcast('stream', 'two')
-        broadcast('stream', 'three')
-      }.to have_broadcasted_to('stream').exactly(:thrice)
+        make_broadcast('stream', 'one')
+        make_broadcast('stream', 'two')
+        make_broadcast('stream', 'three')
+      }.to have_broadcasted('stream').exactly(:thrice)
     end
 
     it "passes with at_least count when sent messages are over limit" do
       expect {
-        broadcast('stream', 'one')
-        broadcast('stream', 'two')
-      }.to have_broadcasted_to('stream').at_least(:once)
+        make_broadcast('stream', 'one')
+        make_broadcast('stream', 'two')
+      }.to have_broadcasted('stream').at_least(:once)
     end
 
     it "passes with at_most count when sent messages are under limit" do
       expect {
-        broadcast('stream', 'hello')
-      }.to have_broadcasted_to('stream').at_most(:once)
+        make_broadcast('stream', 'hello')
+      }.to have_broadcasted('stream').at_most(:once)
     end
 
     it "generates failure message with at least hint" do
       expect {
-        expect { }.to have_broadcasted_to('stream').at_least(:once)
+        expect { }.to have_broadcasted('stream').at_least(:once)
       }.to raise_error(/expected to broadcast at least 1 messages to stream, but broadcast 0/)
     end
 
     it "generates failure message with at most hint" do
       expect {
         expect {
-          broadcast('stream', 'hello')
-          broadcast('stream', 'hello')
-        }.to have_broadcasted_to('stream').at_most(:once)
+          make_broadcast('stream', 'hello')
+          make_broadcast('stream', 'hello')
+        }.to have_broadcasted('stream').at_most(:once)
       }.to raise_error(/expected to broadcast at most 1 messages to stream, but broadcast 2/)
     end
 
     it "passes with provided data" do
       expect {
-        broadcast('stream', id: 42, name: "David")
-      }.to have_broadcasted_to('stream').with(id: 42, name: "David")
+        make_broadcast('stream', id: 42, name: "David")
+      }.to have_broadcasted('stream').with(id: 42, name: "David")
     end
 
     it "passes with provided data matchers" do
       expect {
-        broadcast('stream', id: 42, name: "David", message_id: 123)
-      }.to have_broadcasted_to('stream').with(a_hash_including(name: "David", id: 42))
+        make_broadcast('stream', id: 42, name: "David", message_id: 123)
+      }.to have_broadcasted('stream').with(a_hash_including(name: "David", id: 42))
     end
 
     it "generates failure message when data not match" do
       expect {
         expect {
-          broadcast('stream', id: 42, name: "David", message_id: 123)
-        }.to have_broadcasted_to('stream').with(a_hash_including(name: "John", id: 42))
+          make_broadcast('stream', id: 42, name: "David", message_id: 123)
+        }.to have_broadcasted('stream').with(a_hash_including(name: "John", id: 42))
       }.to raise_error(/expected to broadcast exactly 1 messages to stream with a hash including/)
     end
 
@@ -155,15 +164,15 @@ RSpec.describe "ActionCable matchers", :skip => !RSpec::Rails::FeatureCheck.has_
       require "action_cable/subscription_adapter/inline"
       ActionCable.server.instance_variable_set(:@pubsub, ActionCable::SubscriptionAdapter::Inline)
       expect {
-        expect { broadcast('stream', 'hello') }.to have_broadcasted_to('stream')
+        expect { make_broadcast('stream', 'hello') }.to have_broadcasted('stream')
       }.to raise_error("To use ActionCable matchers set `adapter: :test` in your cable.yml")
     end
 
     it "fails with with block with incorrect data" do
       expect {
         expect {
-          broadcast('stream', "asdf")
-        }.to have_broadcasted_to('stream').with { |data|
+          make_broadcast('stream', "asdf")
+        }.to have_broadcasted('stream').with { |data|
           expect(data).to eq("zxcv")
         }
       }.to raise_error { |e|

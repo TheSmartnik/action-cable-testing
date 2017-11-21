@@ -17,4 +17,9 @@ class ChatChannel < ApplicationCable::Channel
     @room_id = nil
     stop_all_streams
   end
+
+  def greeting
+    current_user = User.new(user_id)
+    self.class.broadcast_to current_user, 'Hi, Welcome'
+  end
 end
